@@ -4,6 +4,7 @@
     
     export let name;
     export let points;
+    export let winner;
     
     let hidden = false;
     const query = firestore.collection('players').where("name", "==", name).get();
@@ -49,13 +50,16 @@
 </style>
 
 	<div class="card shadow" in:fly="{{ y: 200, duration: 700 }}">
-		<h1>{name}</h1>
+        {#if winner}
+    		<h1>👑 {name}</h1>
+        {:else}
+            <h1>{name}</h1>
+        {/if}
 		<h3>{points}</h3>
         <section class="controls">
             <button class="shadow" on:click={increment}>WIN</button>
         {#if !hidden}
-            <button class="shadow" on:click={increment}>+</button>
-            <button class="shadow" on:click={decrement}>-</button>
+            <button class="shadow" on:click={decrement}>DECREASE POINTS</button>
         {/if}
         </section>
 	</div>
