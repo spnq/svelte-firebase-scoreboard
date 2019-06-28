@@ -6,8 +6,7 @@ import { authState } from 'rxfire/auth';
 import { collectionData } from 'rxfire/firestore';
 import { filter } from 'rxjs/operators';
 
-const app = firebase.initializeApp({
-  });
+const app = firebase.initializeApp();
 
 const firestore = firebase.firestore(app); // Initialize firestore
 const auth = firebase.auth(app); // Initialize firebase auth
