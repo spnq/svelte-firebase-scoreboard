@@ -1,17 +1,36 @@
 <script>
 	import Player from './Player.svelte'
-	import { firestore } from './Firebase'
+	import Logger from './Logger.svelte'
+	import { firestore, increment } from './Firebase'
 	import { fly } from 'svelte/transition'
 	import { collectionData } from 'rxfire/firestore'
-
+	import { switchMap } from 'rxjs/operators';
 
 	let players = [];
-	const query =  firestore.collection('players')
-	const message = 'Loading...'
+	let log = [];
+	const playersQuery =  firestore.collection('players');
+	const logQuery =  firestore.collection('log');
+	const message = 'Loading...';
+	const updateLog = (event) => logQuery.add(event.detail)
 
-	collectionData(query, 'id').subscribe( updatedPlayers => {
+	const onRevert = async event => {
+		let player;
+		const query = await firestore.collection('players').where("name", "==", event.detail.name).get()
+		if(event.detail.result === 'win') {
+			query.forEach( doc => firestore.collection('players').doc(doc.id).update({points: increment(-1)}));
+		} else {
+			query.forEach( doc => firestore.collection('players').doc(doc.id).update({points: increment(1)}));
+		}
+		logQuery.doc(event.detail.id).delete().then();
+	}
+
+    collectionData(logQuery, 'id').pipe().subscribe( newLog => {
+		log = [...newLog.sort( (a,b) => b.time -  a.time)].slice(0,10);
+	})
+	collectionData(playersQuery, 'id').subscribe( updatedPlayers => {
 		players = [...updatedPlayers];
 		let winner = players.reduce((acc, val) => acc.points > val.points ? acc : val);
+		if (players.filter( player => player.points === winner.points).length > 1) return;
 		players.filter( player => player === winner).map(next => Object.assign(next, {winner: true}))
 	}, error => message = `Fetching data failed! ${error}`)
 
@@ -23,18 +42,27 @@
 
 <style>
 	*{font-family: "Fira Code"}
-	:global(body){background: #9e9e9e}
+	:global(body){background: #048b80}
+	.glad {
+		height: 80vh;
+	}
 	.container {margin-top: 3rem; display: flex; justify-content: space-around; width: 100%; flex-wrap: wrap}
+	.logger {margin-top: 3rem; display: flex; flex-direction: column; align-content: center; width: 100%; flex-wrap: wrap}
 </style>
 
 <link rel="stylesheet" href="" />
 
 <section class="container">
 		{#if players.length === 0}
-		<p in:fly="{{ y: 200, duration: 700 }}">{message}</p>
+		<p in:fly="{{ y: 200, duration: 700 }}">
+			<img class="glad" src="./tenor.gif" alt="valakas">
+		</p>
 		{:else}
 			{#each players as $player}
-				<Player {...$player} ></Player>
+				<Player on:updateLog={updateLog} {...$player} ></Player>
 			{/each}
 		{/if}
+</section>
+<section class="logger">
+	<Logger log={log} on:revert={onRevert}></Logger>
 </section>
