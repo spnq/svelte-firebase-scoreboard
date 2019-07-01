@@ -4,7 +4,6 @@
 	import { firestore, increment } from './Firebase'
 	import { fly } from 'svelte/transition'
 	import { collectionData } from 'rxfire/firestore'
-	import { switchMap } from 'rxjs/operators';
 
 	let players = [];
 	let log = [];
@@ -47,7 +46,7 @@
 		height: 80vh;
 	}
 	.container {margin-top: 3rem; display: flex; justify-content: space-around; width: 100%; flex-wrap: wrap}
-	.logger {margin-top: 3rem; display: flex; flex-direction: column; align-content: center; width: 100%; flex-wrap: wrap}
+	.logger {margin-top: 3rem; display: flex; flex-direction: column; align-items: center; width: 100%; flex-wrap: wrap}
 </style>
 
 <link rel="stylesheet" href="" />

@@ -44,14 +44,14 @@
     }
     .shadow {box-shadow:  0 5px 3px rgba(0, 0, 0, 0.12), 0 3px 2px rgba(0, 0, 0, 0.24)}
     .card h1, h3{text-align: center}
-    .controls { display: flex; justify-content: space-around; }
+    .controls { display: flex; justify-content: space-around;  flex-wrap: wrap;}
     @media screen and (max-width: 769px) {
-        .controls { display: flex; flex-direction: column; justify-content: space-around; flex-wrap: wrap}
+        .controls { flex-direction: column }
         .card {
-            display: flex; flex-direction: column;
+            display: flex;
+            flex-direction: column;
             flex-wrap: wrap;
             width: 80%;
-            border-radius: 2px;
             margin-bottom: 2rem;
         }
 	}
