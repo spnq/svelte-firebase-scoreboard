@@ -10,22 +10,28 @@
 	const playersQuery =  firestore.collection('players');
 	const logQuery =  firestore.collection('log');
 	const message = 'Loading...';
-	const updateLog = (event) => logQuery.add(event.detail)
 
-	const onRevert = async event => {
-		let player;
-		const query = await firestore.collection('players').where("name", "==", event.detail.name).get()
-		if(event.detail.result === 'win') {
-			query.forEach( doc => firestore.collection('players').doc(doc.id).update({points: increment(-1)}));
-		} else {
-			query.forEach( doc => firestore.collection('players').doc(doc.id).update({points: increment(1)}));
-		}
-		logQuery.doc(event.detail.id).delete().then();
+	const changePoints = async (points, playerName) => {
+		const player = await playersQuery.where("name", "==", playerName).get();
+		player.forEach( doc => playersQuery.doc(doc.id).update({points: increment(points)}));
 	}
 
-    collectionData(logQuery, 'id').pipe().subscribe( newLog => {
-		log = [...newLog.sort( (a,b) => b.time -  a.time)].slice(0,10);
-	})
+	const incrementPoints = playerName => changePoints(1, playerName);
+	const decrementPoints = playerName => changePoints(-1, playerName);
+
+
+	const updateLog = ({detail: {name, result, time}}) => {
+		result === 'win' ? incrementPoints(name) : decrementPoints(name)
+		logQuery.add({name, result, time})
+	}
+
+	const onRevert = ({detail: {name, result, time, id}}) => {
+		result === 'win' ? decrementPoints(name) : incrementPoints(name)
+		logQuery.doc(id).delete().then();
+	}
+
+    collectionData(logQuery, 'id').subscribe( newLog => log = [...newLog.sort( (a,b) => b.time -  a.time)].slice(0,10))
+	
 	collectionData(playersQuery, 'id').subscribe( updatedPlayers => {
 		players = [...updatedPlayers];
 		let winner = players.reduce((acc, val) => acc.points > val.points ? acc : val);

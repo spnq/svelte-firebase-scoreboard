@@ -8,23 +8,11 @@
     export let winner;
     
     let hidden = false;
-    let result;
 
-    const query = firestore.collection('players').where("name", "==", name).get();
     const dispatch = createEventDispatcher()
 
-    const increment = async () => {
-        let snapshot = await query;
-        result = 'win';
-        snapshot.forEach( doc => firestore.collection('players').doc(doc.id).update({points: points += 1}))
-        dispatch('updateLog', {name, result, time: Date.now()})
-    }
-    const decrement = async () => {
-        let snapshot = await query;
-        result = 'decrease';
-        snapshot.forEach( doc => firestore.collection('players').doc(doc.id).update({points: points -= 1}))
-        dispatch('updateLog', {name, result, time: Date.now()});
-    }
+    const increment = () => dispatch('updateLog', {name, result: 'win', time: Date.now()})
+    const decrement = () => dispatch('updateLog', {name, result: 'decrease', time: Date.now()});
 
 </script>
 
